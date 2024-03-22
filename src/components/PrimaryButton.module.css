@@ -1,0 +1,13 @@
+.primary_btn {
+    height: 40px;
+    padding: 10px 20px;
+    border-radius: 24px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+.primary_btn:hover {
+    background: rgba(0, 0, 0, 0.249);
+}
