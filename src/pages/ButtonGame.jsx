@@ -6,6 +6,7 @@ import { BUTTON_COLORS } from '../static/constants';
 export const ButtonGame = ({ data }) => {
     const [buttons, setButtons] = useState([]);
     const [selectedButtons, setSelectedButtons] = useState([]);
+    const [disableClick, setDisableClick] = useState(false)
 
     useEffect(() => {
         console.log(Object.keys(data))
@@ -26,16 +27,18 @@ export const ButtonGame = ({ data }) => {
     // Function to handle button click
     const handleButtonClick = (button) => {
 
+        // If Old selection is wrong, then change colors to default
         if (selectedButtons.length == 2) {
             setButtonColorWithId(selectedButtons[1], BUTTON_COLORS.DEFAULT)
             setButtonColorWithId(selectedButtons[0], BUTTON_COLORS.DEFAULT)
         }
 
         if (selectedButtons.length == 0 || selectedButtons.length == 2) { // It is first button of a PAIR
-            // Make it blue 
+
             setButtonColorWithId(button.label, BUTTON_COLORS.SELECTED_BUTTON)
-            setSelectedButtons([button.label])
-        } else { // It is a second button of a PAIN
+            setSelectedButtons([button.label]) // Save First Button
+
+        } else { // It is a second button of a PAIR
 
             if (selectedButtons.includes(button.label)) { // If same button is clicked then remove selection
 
@@ -45,21 +48,33 @@ export const ButtonGame = ({ data }) => {
             } else { // Another button is clicked
 
                 let firstButton = buttons.reduce((prev, btn) => btn.label == selectedButtons[0] ? btn : prev)
-                let secondButton = button;
+                let secondButton = { ...button };
 
-                setSelectedButtons([firstButton.label, secondButton.label])
+                setSelectedButtons([firstButton.label, secondButton.label]) // Save Second Button
 
-                if (secondButton.type === 'country' && firstButton.label === data[secondButton.label] || secondButton.type == "capital" && secondButton.label == data[firstButton.label]) {
-                    setSelectedButtons([]) // make this empty after 2nd selection right
+                // Check Pairs
+                if (
+                    secondButton.type === 'country' && firstButton.label === data[secondButton.label] ||
+                    secondButton.type == "capital" && secondButton.label == data[firstButton.label]
+                ) {
+                    setSelectedButtons([]) // make this empty if pair selection is right
+
+                    // Disable Click another buttons
+                    setDisableClick(true)
 
                     // Make both green
                     setButtonColorWithId(firstButton.label, BUTTON_COLORS.RIGHT_BUTTONS)
                     setButtonColorWithId(secondButton.label, BUTTON_COLORS.RIGHT_BUTTONS)
 
+                    // Show Animation
                     makeAnimatedBeforeRemove(firstButton)
                     makeAnimatedBeforeRemove(secondButton)
+
+                    // Remove Buttons
                     setTimeout(() => {
                         setButtons([...buttons.filter(btn => ![firstButton.label, secondButton.label].includes(btn.label))])
+                        // Enable Click another buttons
+                        setDisableClick(false)
                     }, 1000);
 
                     return;
@@ -77,7 +92,7 @@ export const ButtonGame = ({ data }) => {
     // Render buttons
     const renderButtons = () => {
         return buttons.map((button, index) => (
-            <PrimaryButton key={button.label} button={button} handleButtonClick={handleButtonClick} />
+            <PrimaryButton disabled={disableClick} key={button.label} button={button} handleButtonClick={handleButtonClick} />
         ));
     };
 
